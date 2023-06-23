@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "megrez"
+dynamic = ["version", "readme"]
+requires-python = ">=3.8"
+license = { text = "MIT" }
+dependencies = [
+    "tomli",
+    "tomli_w",
+    "sympy",
+    "pandas",
+    "appdirs"
+]
+
+[project.extras_require]
+test = [
+    "pytest"
+]
+vis = [
+    "jupyterlab>=4",
+    "ipympl",
+    "matplotlib"
+]
+
+[tool.setuptools_scm]
+write_to = "megrez/_version.py"
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.rst"]}
+
+[tool.ruff]
+line-length = 100
