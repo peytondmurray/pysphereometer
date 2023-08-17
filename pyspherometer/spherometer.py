@@ -141,8 +141,6 @@ class Spherometer:
             )
         file.parent.mkdir(parents=True, exist_ok=True)
 
-        a, b, c, s, d_b, ds, dx = sy.symbols("a, b, c, s, d_b, Delta_s, Delta_x")
-
         if dial_meas:
             sagitta = self.s0 - dial_meas
 
@@ -190,3 +188,41 @@ class Spherometer:
             config = tomli.load(f)
 
         return cls(**config)
+
+    def __str__(self):
+        return vars(self)
+
+    def get_records(self, file=None, aperture=None):
+        if file is None:
+            file = (
+                pathlib.Path(appdirs.user_data_dir("megrez"))
+                / "spherometer_records.csv"
+            )
+        df = pd.read_csv(file).set_index("datetime")
+
+        if aperture is not None:
+            df['F'] = df['f']/aperture
+
+        return df
+
+    def expr_target_f_ratio(self):
+        d_b, d, r_s, F = sy.symbols("d_b, d, r_s, F")
+
+        term = (4*F*d + d_b)
+        return (-term + sy.sqrt(term**2 + 4*r_s**2))/2
+        # Reject negative root
+        # return (-term + sy.sqrt(term**2 + 4*r_s**2))/2, (-term - sy.sqrt(term**2 + 4*r_s**2))/2
+
+    def func_target_f_ratio(self):
+        a, b, c, k, F, r_s, d, d_b = sy.symbols("a, b, c, k, F, r_s, d, d_b")
+
+        return sy.lambdify(
+            [F, d],
+            self.expr_target_f_ratio().subs(
+                [(r_s, self.expr_r_s())]
+            ).subs(
+                [(k, self.expr_k())]
+            ).subs(
+                [(a, self.a), (b, self.b), (c, self.c), (d_b, self.d_b)]
+            ),
+        )
