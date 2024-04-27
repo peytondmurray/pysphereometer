@@ -12,7 +12,8 @@ dependencies = [
     "tomli_w",
     "sympy",
     "pandas",
-    "appdirs"
+    "appdirs",
+    "rich"
 ]
 
 [project.optional-dependencies]
